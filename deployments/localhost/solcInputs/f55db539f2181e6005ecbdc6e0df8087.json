@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/PiggyBank.sol": {
+      "content": "//SPDX License-Identifier: MIT\r\npragma solidity ^0.8.9;\r\n\r\n// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.7;\r\n//Imports\r\n\r\n//To get the right conversion to use\r\n//divide the number u want to fund by current price of eth by  and convert to wei\r\n\r\n//50/ 1313 \r\n\r\n\r\n//State Variable\r\ncontract PiggyBank {\r\n\r\n\r\n\r\n    address payable public owner;\r\nuint256 public USD = 10*10**18;\r\n\r\n\r\nconstructor() {\r\n   \r\n    owner == msg.sender;\r\n}\r\n\r\nmodifier onlyOwner() {\r\n    require(msg.sender == owner, \"Not Owner\");\r\n    _;\r\n}\r\n\r\nfunction depositFund() public payable {\r\n require(msg.value >= USD, \"add more Eth\");\r\n\r\n\r\n}\r\n\r\nfunction withdrawFund(address _to, uint _amount) external onlyOwner {\r\n    (bool success, ) = _to.call{value: _amount}(\"\");\r\n    require(success, \"having issues with transaction at this time\");\r\n}\r\n\r\n\r\n\r\n function destroyContract(address payable _to) external onlyOwner {\r\n     selfdestruct(_to);\r\n\r\n\r\n }\r\n\r\nfunction getBalalnce() external view returns(uint256) {\r\n    return address(this).balance;\r\n}\r\n\r\n}\r\n\r\n  "
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

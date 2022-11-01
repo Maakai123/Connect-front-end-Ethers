@@ -1,0 +1,41 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Piggybank.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.7;\r\n//Imports\r\n\r\n//To get the right conversion to use\r\n//divide the number u want to fund by current price of eth by  and convert to wei\r\n\r\n//50/ 1313 \r\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\r\nimport \"./PriceConverter.sol\";\r\n\r\n//State Variable\r\ncontract PiggyBank {\r\n using PriceConverter for uint256;\r\n\r\naddress payable public owner;\r\nuint256 public USD = 10*10**18;\r\nAggregatorV3Interface public priceFeed;\r\n\r\nconstructor(address priceFeedAddress) {\r\n    priceFeed = AggregatorV3Interface(priceFeedAddress);\r\n    owner == msg.sender;\r\n}\r\n\r\nmodifier onlyOwner() {\r\n    require(msg.sender == owner, \"Not Owner\");\r\n    _;\r\n}\r\n\r\nfunction depositFund() public payable {\r\n require(msg.value.getConversionRate(AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e))>= USD, \"add more Eth\");\r\n\r\n\r\n}\r\n\r\nfunction withdrawFund(address _to, uint _amount) external onlyOwner {\r\n    (bool success, ) = _to.call{value: _amount}(\"\");\r\n    require(success, \"having issues with transaction at this time\");\r\n}\r\n\r\nfunction getVersion() external view returns(uint256) {\r\n    // ETH/USD price feed address of Goerli Network.\r\n\r\n    AggregatorV3Interface priceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);\r\n    return priceFeed.version();\r\n}\r\n function destroyContract(address payable _to) external onlyOwner {\r\n     selfdestruct(_to);\r\n\r\n\r\n }\r\n\r\nfunction getBalalnce() external view returns(uint256) {\r\n    return address(this).balance;\r\n}\r\n\r\n\r\n\r\n}\r\n\r\n"
+    },
+    "contracts/PriceConverter.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.8;\r\n\r\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\r\n\r\n// Why is this a library and not abstract?\r\n// Why not an interface?\r\nlibrary PriceConverter {\r\n    // We could make this public, but then we'd have to deploy it\r\n    function getPrice(AggregatorV3Interface priceFeed) public view returns (uint256) {\r\n        // Goerli ETH / USD Address\r\n        // https://docs.chain.link/docs/ethereum-addresses/\r\n        AggregatorV3Interface priceFeed = AggregatorV3Interface(\r\n            0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e\r\n        );\r\n        (, int256 answer, , , ) = priceFeed.latestRoundData();\r\n        // ETH/USD rate in 18 digit\r\n        return uint256(answer * 10000000000);\r\n    }\r\n\r\n    // 1000000000\r\n    function getConversionRate(uint256 ethAmount, AggregatorV3Interface priceFeed)\r\n        internal\r\n        view\r\n        returns (uint256)\r\n    {\r\n        uint256 ethPrice = getPrice(priceFeed);\r\n        uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1000000000000000000;\r\n        // the actual ETH/USD conversion rate, after adjusting the extra 0s.\r\n        return ethAmountInUsd;\r\n    }\r\n}"
+    },
+    "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  function getRoundData(uint80 _roundId)\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n\n  function latestRoundData()\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
